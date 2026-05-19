@@ -10,6 +10,14 @@ enum ROOM_TYPE
     REST_ROOM
 };
 
+enum ERROR_TYPE
+{
+    SUCESS,
+    FULLROOM_ERR,
+    EMPTYROOM_ERR
+};
+
+
 class Room
 {
     public:
@@ -25,12 +33,13 @@ class Room
         void        setRoomSize(uint16_t size);
 
         uint8_t     addAnt(Ant &ant);
-        void        removeAnt(Ant &ant);
+        uint8_t     removeAnt(Ant &ant);
 
     private:
-        void        *_nextRoom;
-        void        *_prevRoom;
+        void        *_nextRoom = nullptr;
+        void        *_prevRoom = nullptr;
+        uint16_t    _antsCount = 0;
         uint16_t    _roomSize;
-        void        **_ants;
-        uint8_t     roomType;
+        Ant         **_ants = nullptr;
+        uint8_t     _roomType;
 };
