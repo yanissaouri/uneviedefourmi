@@ -10,17 +10,18 @@ HEADER_DIR = include
 SRC_DIR    = src
 BUILD_DIR  = build/
 
-# OS detection
+# Cross-platform recursive file search (no shell commands needed)
+rwildcard  = $(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+SOURCES   := $(call rwildcard,$(SRC_DIR),*.cpp)
+HEADERS   := $(call rwildcard,$(HEADER_DIR),*.hpp)
+
+# OS-specific commands
 ifeq ($(OS),Windows_NT)
     EXT     := .exe
-    MKDIR_P  = cmd /C if not exist "$(subst /,\,$(@D))" mkdir "$(subst /,\,$(@D))"
-    SOURCES := $(subst \,/,$(shell cmd /C dir /B /S $(subst /,\,$(SRC_DIR))\*.cpp 2>nul))
-    HEADERS := $(subst \,/,$(shell cmd /C dir /B /S $(subst /,\,$(HEADER_DIR))\*.hpp 2>nul))
+    MKDIR_P  = cmd /C mkdir "$(subst /,\,$(@D))" 2>nul
 else
     EXT     :=
     MKDIR_P  = mkdir -p $(@D)
-    SOURCES := $(shell find $(SRC_DIR) -name '*.cpp')
-    HEADERS := $(shell find $(HEADER_DIR) -name '*.hpp' 2>/dev/null)
 endif
 
 NAME     = uneviedefourmi$(EXT)
