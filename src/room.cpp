@@ -1,4 +1,5 @@
 #include "../include/Room.hpp"
+#include <cstddef>
 #include <cstdint>
 
 Room::Room(void)
@@ -59,7 +60,8 @@ uint8_t Room::removeAnt(Ant &ant)
 {
     if (this->_antsCount != 0)
     {
-        return 0;
+        this->_ants[this->_antsCount] = nullptr;
+        this->_antsCount--;
     }
     else
     {
