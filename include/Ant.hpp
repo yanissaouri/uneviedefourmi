@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <string>
 
+class Room;
+
 class Ant
 {
     public:
@@ -17,8 +19,8 @@ class Ant
         Room        *getRoomPtr(void);
 
     private:
-        bool _isWaiting;
+        bool        _isWaiting;
         uint16_t    _id;
         std::string _name;    
-        Room *_roomPtr;  
+        Room        *_roomPtr;  
 };

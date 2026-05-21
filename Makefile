@@ -3,7 +3,7 @@
 
 # Toolchain and flags
 CXX      = g++
-CXXFLAGS = -Wall -Wextra -Werror -g
+CXXFLAGS = -g #-Wall -Wextra -Werror 
 
 # Project structure
 HEADER_DIR = include

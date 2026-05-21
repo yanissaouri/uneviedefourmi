@@ -1,5 +1,5 @@
-#include "../include/Room.hpp"
-#include "../include/Ant.hpp"
+#include "Room.hpp"
+#include "Ant.hpp"
 
 #include <iostream>
 

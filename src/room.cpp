@@ -42,29 +42,26 @@ void Room::setRoomSize(uint16_t size)
     this->_roomSize = size;
 }
 
-uint8_t Room::addAnt(Ant &ant)
+// not finished
+uint8_t Room::addAnt(Ant *ant)
 {
     if (this->_antsCount != this->_roomSize)
     {
-        this->_ants[this->_antsCount] = &ant;
-        this->_antsCount++;
-        return SUCESS;
+        // todo
     }
     else
     {
         return FULLROOM_ERR;
     }
+    return 0;
 }
 
-uint8_t Room::removeAnt(Ant &ant)
+// not finished
+uint8_t Room::removeAnt(Ant *ant)
 {
-    if (this->_antsCount != 0)
-    {
-        this->_ants[this->_antsCount] = nullptr;
-        this->_antsCount--;
-    }
-    else
-    {
+    if (this->_antsCount == 0)
         return EMPTYROOM_ERR;
-    }
+
+    // todo
+    return 0;
 }
