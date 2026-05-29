@@ -84,10 +84,9 @@ size_t Anthill::parseRooms(void)
     Room    *endRoom = new Room();
     Room    *tail = startRoom;
 
-    startRoom->setRoomType(BEGIN_ROOM);
+    startRoom->setRoomType(NORMAL_ROOM);
     startRoom->setRoomNumber(0);
     this->_roomListHead = startRoom;
-    this->_startRoom = startRoom;
 
     while (line_index < this->_file.size())
     {
@@ -107,6 +106,8 @@ size_t Anthill::parseRooms(void)
             size_t brace_pos = line.find('{');
             if (brace_pos != std::string::npos)
                 room->setRoomSize((uint16_t)std::atoi(line.c_str() + brace_pos + 1));
+            else
+                room->setRoomSize(1);
 
             tail->setListNext(room);
             tail = room;
@@ -114,10 +115,9 @@ size_t Anthill::parseRooms(void)
         line_index++;
     }
 
-    endRoom->setRoomType(REST_ROOM);
+    endRoom->setRoomType(NORMAL_ROOM);
     endRoom->setRoomNumber(UINT16_MAX);
     tail->setListNext(endRoom);
-    this->_endRoom = endRoom;
 
     return line_index;
 }
@@ -140,6 +140,26 @@ void Anthill::parseTunnels(size_t line_index)
             Room *to   = findRoom(this->_roomListHead, right_nb);
             if (from && to)
             {
+                if (left[1] == 'v')
+                {
+                    from->setRoomType(BEGIN_ROOM);
+                    this->_startRoom = from;
+                }
+                else if (left[1] == 'd')
+                {
+                    from->setRoomType(REST_ROOM);
+                    this->_endRoom = from;
+                }
+                if (right[1] == 'v')
+                {
+                    to->setRoomType(BEGIN_ROOM);
+                    this->_startRoom = to;
+                }
+                else if (right[1] == 'd')
+                {
+                    to->setRoomType(REST_ROOM);
+                    this->_endRoom = to;
+                }
                 from->addNextRoomPtr(to);
                 to->addPrevRoomPtr(from);
             }
