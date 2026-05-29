@@ -1,31 +1,35 @@
-#include "Room.hpp"
-#include "Ant.hpp"
+#include "../include/Anthill.hpp"
+#include "../include/Solver.hpp"
 
 #include <iostream>
 
-int main(void)
+int main(int argc, char **argv)
 {
-    std::cout << "test";
+    Anthill test;
 
-    Room room[14];
+    if (argc != 2)
+    {
+        std::cerr << "Need to enter the .txt file." << std::endl;
+        return 1;
+    }
 
-    // room[0].setRoomSize(8);
-    // room[1].setRoomSize(4);
-    // room[2].setRoomSize(2);
-    // room[3].setRoomSize(4);
-    // room[4].setRoomSize(2);
-    // room[5].setRoomSize(4);
-    // room[6].setRoomSize(2);
-    // room[7].setRoomSize(5);
-    // room[8].setRoomSize(0);
-    // room[9].setRoomSize(0);
-    // room[10].setRoomSize(0);
-    // room[11].setRoomSize(0);
-    // room[12].setRoomSize(4);
-    // room[13].setRoomSize(2);
+    if (test.openFile(argv[1]))
+    {
+        std::cerr << "Unable to open file!" << std::endl;
+        return 1;
+    }
 
-    // room[0].setNextRoomPtr(&room[1]);
-    // room[1].setNextRoomPtr(&room[2]);
+    if (test.parseText())
+    {
+        std::cerr << ".txt file is incorrect." << std::endl;
+        return 1;
+    }
+
+    Solver solver;
+    solver.setAnthill(&test);
+    solver.findPaths();
+    solver.simulate();
+    solver.printSteps();
 
     return 0;
 }

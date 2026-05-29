@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <list>
+#include <vector>
 #include "Ant.hpp"
 
 enum ROOM_TYPE
@@ -26,23 +27,33 @@ class Room
         Room(void);
         ~Room();
 
-        void            *getNextRoomPtr(void);
-        void            *getPrevRoomPtr(void);
+        void            *getNextRoomPtr(int index);
+        int             getNextRoomCount(void);
+        void            *getPrevRoomPtr(int index);
+        int             getPrevRoomCount(void);
+        void            *getListNext(void);
         uint16_t        getRoomSize(void);
+        uint16_t        getRoomNumber(void);
+        uint16_t        getAntsCount(void);
+        uint8_t         getRoomType(void);
 
-        void            setNextRoomPtr(void *next_room_ptr);
-        void            setPrevRoomPtr(void *prev_room_ptr);
+        void            addNextRoomPtr(void *next_room_ptr);
+        void            addPrevRoomPtr(void *prev_room_ptr);
+        void            setListNext(void *next);
         void            setRoomSize(uint16_t size);
+        void            setRoomNumber(uint16_t number);
+        void            setRoomType(uint8_t type);
 
         uint8_t         addAnt(Ant *ant);
         uint8_t         removeAnt(Ant *ant);
 
     private:
-        void            *_nextRoom = nullptr;
-        void            *_prevRoom = nullptr;
-        uint16_t        _antsCount = 0;
-        uint16_t        _roomSize;
-        uint16_t        _roomNumber;
-        std::list<Ant>  _ants;
-        uint8_t         _roomType;
+        std::vector<void *> _nextRooms;
+        std::vector<void *> _prevRooms;
+        void                *_listNext = nullptr;
+        uint16_t            _antsCount = 0;
+        uint16_t            _roomSize = 0;
+        uint16_t            _roomNumber = 0;
+        std::list<Ant>      _ants;
+        uint8_t             _roomType = NORMAL_ROOM;
 };

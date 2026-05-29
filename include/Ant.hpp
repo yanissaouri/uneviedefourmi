@@ -17,6 +17,7 @@ class Ant
         void        setId(uint16_t id);
         void        setName(std::string name);
         Room        *getRoomPtr(void);
+        void        setRoomPtr(Room *room);
 
     private:
         bool        _isWaiting;
