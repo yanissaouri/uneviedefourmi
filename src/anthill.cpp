@@ -1,125 +1,178 @@
 #include "../include/Anthill.hpp"
+
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 #include <fstream>
-#include <sstream>
 #include <iostream>
+#include <string>
+#include <string.h>
 
-Anthill::Anthill(void)
+Anthill::Anthill()
 {
-    this->_antCount = 0;
-    this->_vestibule = nullptr;
-    this->_dortoir = nullptr;
     return ;
 }
 
-Anthill::~Anthill(void)
+Anthill::~Anthill()
 {
-    for (Room *room : this->_rooms)
-        delete room;
-    return ;
+    Room *current = this->_roomListHead;
+    while (current)
+    {
+        Room *next = (Room *)(current->getListNext());
+        delete current;
+        current = next;
+    }
 }
 
-Room        *Anthill::getVestibule(void)
+uint8_t Anthill::openFile(char *file_path)
 {
-    return this->_vestibule;
+    std::ifstream file(file_path);
+    std::string line;
+
+    if (file.is_open())
+    {
+        while (getline(file, line))
+        {
+            this->_file.push_back(line);
+        }
+
+
+        file.close();
+    }
+    else
+    {
+        return 1;
+    }
+
+    return 0;
 }
 
-Room        *Anthill::getDortoir(void)
+static Room *findRoom(Room *head, uint16_t number)
 {
-    return this->_dortoir;
-}
-
-uint16_t    Anthill::getAntCount(void)
-{
-    return this->_antCount;
-}
-
-std::vector<Room*>  Anthill::getRooms(void)
-{
-    return this->_rooms;
-}
-
-std::vector<std::pair<Room*, Room*>>    Anthill::getTunnels(void)
-{
-    return this->_tunnels;
-}
-
-void    Anthill::addRoom(Room *room)
-{
-    this->_rooms.push_back(room);
-    return ;
-}
-
-void    Anthill::addTunnel(Room *a, Room *b)
-{
-    this->_tunnels.push_back(std::make_pair(a, b));
-    return ;
-}
-
-Room    *Anthill::getRoom(std::string name)
-{
-    if (this->_roomMap.find(name) != this->_roomMap.end())
-        return this->_roomMap[name];
+    for (Room *r = head; r != nullptr; r = static_cast<Room *>(r->getListNext()))
+    {
+        if (r->getRoomNumber() == number)
+            return r;
+    }
     return nullptr;
 }
 
-void    Anthill::loadFromFile(std::string filename)
+static uint16_t parseRoomNb(const std::string &s)
 {
-    std::ifstream   file(filename);
-    std::string     line;
+    if (s.size() < 2)
+        return 0;
+    if (s[1] == 'v')
+        return 0;
+    if (s[1] == 'd')
+        return UINT16_MAX;
 
-    if (!file.is_open())
+    return (uint16_t)std::atoi(s.c_str() + 1);
+}
+
+uint8_t Anthill::parseAntsCount(void)
+{
+    if (!strstr(this->_file[0].c_str(), "f="))
+        return 1;
+    this->_totalAntsCount = atoi(this->_file[0].substr(2).c_str());
+    return 0;
+}
+
+size_t Anthill::parseRooms(void)
+{
+    size_t  line_index = 1;
+    Room    *startRoom = new Room();
+    Room    *endRoom = new Room();
+    Room    *tail = startRoom;
+
+    startRoom->setRoomType(BEGIN_ROOM);
+    startRoom->setRoomNumber(0);
+    this->_roomListHead = startRoom;
+    this->_startRoom = startRoom;
+
+    while (line_index < this->_file.size())
     {
-        std::cerr << "Error: cannot open file " << filename << std::endl;
-        return ;
+        const std::string   &line = this->_file[line_index];
+
+        if (line.empty() || strstr(line.c_str(), " - "))
+            break;
+
+        if (line[0] == 'S' && std::isdigit((unsigned char)line[1]))
+        {
+            Room        *room = new Room();
+            uint16_t    room_nb = (uint16_t)std::atoi(line.c_str() + 1);
+
+            room->setRoomNumber(room_nb);
+            room->setRoomType(NORMAL_ROOM);
+
+            size_t brace_pos = line.find('{');
+            if (brace_pos != std::string::npos)
+                room->setRoomSize((uint16_t)std::atoi(line.c_str() + brace_pos + 1));
+
+            tail->setListNext(room);
+            tail = room;
+        }
+        line_index++;
     }
 
-    // lire le nombre de fourmis
-    std::getline(file, line);
-    this->_antCount = std::stoi(line.substr(2));
+    endRoom->setRoomType(REST_ROOM);
+    endRoom->setRoomNumber(UINT16_MAX);
+    tail->setListNext(endRoom);
+    this->_endRoom = endRoom;
 
-    // créer vestibule et dortoir
-    this->_vestibule = new Room();
-    this->_vestibule->setName("Sv");
-    this->_dortoir = new Room();
-    this->_dortoir->setName("Sd");
-    this->_roomMap["Sv"] = this->_vestibule;
-    this->_roomMap["Sd"] = this->_dortoir;
-    this->_rooms.push_back(this->_vestibule);
-    this->_rooms.push_back(this->_dortoir);
+    return line_index;
+}
 
-    // lire les salles et tunnels
-    while (std::getline(file, line))
+void Anthill::parseTunnels(size_t line_index)
+{
+    while (line_index < this->_file.size())
     {
-        if (!line.empty() && line.back() == '\r')
-            line.pop_back();
+        const std::string   &line = this->_file[line_index];
+        size_t              sep = line.find(" - ");
 
-        std::cout << "ligne lue: [" << line << "]" << std::endl; // debug
-
-        if (line.find(" - ") != std::string::npos)
+        if (sep != std::string::npos)
         {
-            // c'est un tunnel
-            std::string nameA = line.substr(0, line.find(" - "));
-            std::string nameB = line.substr(line.find(" - ") + 3);
+            std::string     left = line.substr(0, sep);
+            std::string     right = line.substr(sep + 3);
+            uint16_t        left_nb = parseRoomNb(left);
+            uint16_t        right_nb = parseRoomNb(right);
 
-            Room *a = this->getRoom(nameA);
-            Room *b = this->getRoom(nameB);
-
-            if (a && b)
+            Room *from = findRoom(this->_roomListHead, left_nb);
+            Room *to   = findRoom(this->_roomListHead, right_nb);
+            if (from && to)
             {
-                this->addTunnel(a, b);
-                a->addNeighbor(b);
-                b->addNeighbor(a);
+                from->addNextRoomPtr(to);
+                to->addPrevRoomPtr(from);
             }
         }
-        else
-        {
-            // c'est une salle
-            Room *room = new Room();
-            room->setName(line);
-            this->_roomMap[line] = room;
-            this->_rooms.push_back(room);
-        }
+        line_index++;
     }
-    file.close();
-    return ;
+}
+
+uint8_t Anthill::parseText(void)
+{
+    if (this->parseAntsCount())
+        return 1;
+    size_t tunnel_start = this->parseRooms();
+    this->parseTunnels(tunnel_start);
+    return 0;
+}
+
+uint64_t Anthill::getTotalAntsCount(void)
+{
+    return this->_totalAntsCount;
+}
+
+Room *Anthill::getRoomList(void)
+{
+    return this->_roomListHead;
+}
+
+Room *Anthill::getStartRoom(void)
+{
+    return this->_startRoom;
+}
+
+Room *Anthill::getEndRoom(void)
+{
+    return this->_endRoom;
 }

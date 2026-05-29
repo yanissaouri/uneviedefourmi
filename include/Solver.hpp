@@ -21,9 +21,9 @@ class Solver
         void    printSteps(void);
 
     private:
-        Anthill                             *_anthill;
-        std::vector<Ant*>                   _ants;
-        std::vector<std::vector<Room*>>     _paths;
-        std::queue<std::vector<Room*>>      _toExplore;
-        std::vector<std::vector<std::string>> _steps;
+        Anthill                                 *_anthill;
+        std::vector<Ant*>                       _ants;
+        std::vector<std::vector<Room*>>         _paths;
+        std::queue<std::vector<Room*>>          _toExplore;
+        std::vector<std::vector<std::string>>   _steps;
 };

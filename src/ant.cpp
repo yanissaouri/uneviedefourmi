@@ -1,20 +1,10 @@
 #include "../include/Ant.hpp"
 
-Ant::Ant(void)
-{
-    this->_id = 0;
-    this->_name = "";
-    this->_roomPtr = nullptr;
-    this->_isWaiting = false;
-    return ;
-}
+Ant::Ant() : _isWaiting(false), _id(0), _roomPtr(nullptr) {}
 
-Ant::~Ant(void)
-{
-    return ;
-}
+Ant::~Ant() {}
 
-uint16_t    Ant::getId(void)
+uint16_t Ant::getId(void)
 {
     return this->_id;
 }
@@ -24,25 +14,22 @@ std::string Ant::getName(void)
     return this->_name;
 }
 
-Room        *Ant::getRoomPtr(void)
+void Ant::setId(uint16_t id)
+{
+    this->_id = id;
+}
+
+void Ant::setName(std::string name)
+{
+    this->_name = name;
+}
+
+Room *Ant::getRoomPtr(void)
 {
     return this->_roomPtr;
 }
 
-void        Ant::setId(uint16_t id)
+void Ant::setRoomPtr(Room *room)
 {
-    this->_id = id;
-    return ;
-}
-
-void        Ant::setName(std::string name)
-{
-    this->_name = name;
-    return ;
-}
-
-void        Ant::setRoomPtr(Room *room_ptr)
-{
-    this->_roomPtr = room_ptr;
-    return ;
+    this->_roomPtr = room;
 }

@@ -21,11 +21,31 @@ void    Solver::setAnthill(Anthill *anthill)
     return ;
 }
 
+static std::vector<Room*> getNeighbors(Room *room)
+{
+    std::vector<Room*> neighbors;
+    for (int i = 0; i < room->getNextRoomCount(); i++)
+        neighbors.push_back((Room*)room->getNextRoomPtr(i));
+    for (int i = 0; i < room->getPrevRoomCount(); i++)
+        neighbors.push_back((Room*)room->getPrevRoomPtr(i));
+    return neighbors;
+}
+
+static std::string getRoomName(Room *room)
+{
+    uint8_t type = room->getRoomType();
+    if (type == BEGIN_ROOM)
+        return "Sv";
+    if (type == REST_ROOM)
+        return "Sd";
+    return "S" + std::to_string(room->getRoomNumber());
+}
+
 void    Solver::findPaths(void)
 {
     std::vector<Room*> startPath;
 
-    startPath.push_back(this->_anthill->getVestibule());
+    startPath.push_back(this->_anthill->getStartRoom());
     this->_toExplore.push(startPath);
 
     while (!this->_toExplore.empty())
@@ -35,13 +55,13 @@ void    Solver::findPaths(void)
 
         Room *lastRoom = currentPath.back();
 
-        if (lastRoom == this->_anthill->getDortoir())
+        if (lastRoom == this->_anthill->getEndRoom())
         {
             this->_paths.push_back(currentPath);
             continue ;
         }
 
-        std::vector<Room*> neighbors = lastRoom->getNeighbors();
+        std::vector<Room*> neighbors = getNeighbors(lastRoom);
         for (Room *neighbor : neighbors)
         {
             bool visited = false;
@@ -66,29 +86,31 @@ void    Solver::findPaths(void)
 
 void    Solver::simulate(void)
 {
-    for (uint16_t i = 0; i < this->_anthill->getAntCount(); i++)
+    uint64_t antCount = this->_anthill->getTotalAntsCount();
+
+    for (uint64_t i = 0; i < antCount; i++)
     {
         Ant *ant = new Ant();
-        ant->setId(i + 1);
+        ant->setId((uint16_t)(i + 1));
         ant->setName("f" + std::to_string(i + 1));
-        ant->setRoomPtr(this->_anthill->getVestibule());
+        ant->setRoomPtr(this->_anthill->getStartRoom());
         this->_ants.push_back(ant);
     }
 
-    uint16_t    antsInDortoir = 0;
+    uint64_t    antsInDortoir = 0;
     uint16_t    stepNumber = 0;
 
-    while (antsInDortoir < this->_anthill->getAntCount())
+    while (antsInDortoir < antCount)
     {
         std::vector<std::string>    currentStep;
         stepNumber++;
 
-        for (uint16_t i = 0; i < this->_ants.size(); i++)
+        for (uint64_t i = 0; i < this->_ants.size(); i++)
         {
             Ant     *ant = this->_ants[i];
             Room    *current = ant->getRoomPtr();
 
-            if (current == this->_anthill->getDortoir())
+            if (current == this->_anthill->getEndRoom())
                 continue ;
 
             std::vector<Room*> path = this->_paths[i % this->_paths.size()];
@@ -107,7 +129,8 @@ void    Solver::simulate(void)
             {
                 Room *next = path[pos + 1];
 
-                if (next == this->_anthill->getDortoir() ||
+                if (next == this->_anthill->getEndRoom() ||
+                    next->getRoomSize() == 0 ||
                     next->getAntsCount() < next->getRoomSize())
                 {
                     current->removeAnt(ant);
@@ -115,11 +138,11 @@ void    Solver::simulate(void)
                     ant->setRoomPtr(next);
 
                     std::string move = ant->getName() + " - " +
-                                      current->getName() + " - " +
-                                      next->getName();
+                                      getRoomName(current) + " - " +
+                                      getRoomName(next);
                     currentStep.push_back(move);
 
-                    if (next == this->_anthill->getDortoir())
+                    if (next == this->_anthill->getEndRoom())
                         antsInDortoir++;
                 }
             }

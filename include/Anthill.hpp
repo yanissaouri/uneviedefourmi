@@ -1,36 +1,32 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
+#include <iostream>
 #include <vector>
-#include <map>
-#include <utility>
-
 #include "Room.hpp"
-#include "Ant.hpp"
 
 class Anthill
 {
     public:
-        Anthill(void);
-        ~Anthill(void);
+        Anthill();
+        ~Anthill();
 
-        Room        *getVestibule(void);
-        Room        *getDortoir(void);
-        uint16_t    getAntCount(void);
-        std::vector<Room*>                      getRooms(void);
-        std::vector<std::pair<Room*, Room*>>    getTunnels(void);
+        uint8_t                                     openFile(char *file_path);
+        uint8_t                                     parseText(void);
 
-        void        addRoom(Room *room);
-        void        addTunnel(Room *a, Room *b);
-        Room        *getRoom(std::string name);
-        void        loadFromFile(std::string filename);
+        uint64_t                                    getTotalAntsCount(void);
+        Room                                        *getRoomList(void);
+        Room                                        *getStartRoom(void);
+        Room                                        *getEndRoom(void);
 
     private:
-        uint16_t                                _antCount;
-        Room                                    *_vestibule;
-        Room                                    *_dortoir;
-        std::vector<Room*>                      _rooms;
-        std::vector<std::pair<Room*, Room*>>    _tunnels;
-        std::map<std::string, Room*>            _roomMap;
+        uint8_t                                     parseAntsCount(void);
+        size_t                                      parseRooms(void);
+        void                                        parseTunnels(size_t line_index);
+
+        std::vector<std::string>                    _file;
+        uint64_t                                    _totalAntsCount;
+        Room                                        *_roomListHead = nullptr;
+        Room                                        *_startRoom = nullptr;
+        Room                                        *_endRoom = nullptr;
 };

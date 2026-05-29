@@ -1,24 +1,32 @@
 #include "../include/Anthill.hpp"
 #include "../include/Solver.hpp"
+
 #include <iostream>
 
 int main(int argc, char **argv)
 {
+    Anthill test;
+
     if (argc != 2)
     {
-        std::cerr << "Usage: ./uneviedefourmi <fichier>" << std::endl;
+        std::cerr << "Need to enter the .txt file." << std::endl;
         return 1;
     }
 
-    Anthill anthill;
-    anthill.loadFromFile(argv[1]);
+    if (test.openFile(argv[1]))
+    {
+        std::cerr << "Unable to open file!" << std::endl;
+        return 1;
+    }
 
-    std::cout << "Ant count: " << anthill.getAntCount() << std::endl;
-    std::cout << "Rooms: " << anthill.getRooms().size() << std::endl;
-    std::cout << "Tunnels: " << anthill.getTunnels().size() << std::endl;
+    if (test.parseText())
+    {
+        std::cerr << ".txt file is incorrect." << std::endl;
+        return 1;
+    }
 
     Solver solver;
-    solver.setAnthill(&anthill);
+    solver.setAnthill(&test);
     solver.findPaths();
     solver.simulate();
     solver.printSteps();

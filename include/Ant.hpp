@@ -13,15 +13,15 @@ class Ant
 
         uint16_t    getId(void);
         std::string getName(void);
-        Room        *getRoomPtr(void);
 
         void        setId(uint16_t id);
         void        setName(std::string name);
-        void        setRoomPtr(Room *room_ptr);
+        Room        *getRoomPtr(void);
+        void        setRoomPtr(Room *room);
 
     private:
         bool        _isWaiting;
         uint16_t    _id;
-        std::string _name;
-        Room        *_roomPtr;
+        std::string _name;    
+        Room        *_roomPtr;  
 };
