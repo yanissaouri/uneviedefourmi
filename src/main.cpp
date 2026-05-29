@@ -1,31 +1,27 @@
-#include "Room.hpp"
-#include "Ant.hpp"
-
+#include "../include/Anthill.hpp"
+#include "../include/Solver.hpp"
 #include <iostream>
 
-int main(void)
+int main(int argc, char **argv)
 {
-    std::cout << "test";
+    if (argc != 2)
+    {
+        std::cerr << "Usage: ./uneviedefourmi <fichier>" << std::endl;
+        return 1;
+    }
 
-    Room room[14];
+    Anthill anthill;
+    anthill.loadFromFile(argv[1]);
 
-    // room[0].setRoomSize(8);
-    // room[1].setRoomSize(4);
-    // room[2].setRoomSize(2);
-    // room[3].setRoomSize(4);
-    // room[4].setRoomSize(2);
-    // room[5].setRoomSize(4);
-    // room[6].setRoomSize(2);
-    // room[7].setRoomSize(5);
-    // room[8].setRoomSize(0);
-    // room[9].setRoomSize(0);
-    // room[10].setRoomSize(0);
-    // room[11].setRoomSize(0);
-    // room[12].setRoomSize(4);
-    // room[13].setRoomSize(2);
+    std::cout << "Ant count: " << anthill.getAntCount() << std::endl;
+    std::cout << "Rooms: " << anthill.getRooms().size() << std::endl;
+    std::cout << "Tunnels: " << anthill.getTunnels().size() << std::endl;
 
-    // room[0].setNextRoomPtr(&room[1]);
-    // room[1].setNextRoomPtr(&room[2]);
+    Solver solver;
+    solver.setAnthill(&anthill);
+    solver.findPaths();
+    solver.simulate();
+    solver.printSteps();
 
     return 0;
 }
